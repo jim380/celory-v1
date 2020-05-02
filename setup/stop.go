@@ -1,8 +1,8 @@
 package setup
 
 import (
-	"github.com/node_tooling/Celo/cmd"
-	"github.com/node_tooling/Celo/util"
+	"github.com/jim380/Celory/cmd"
+	"github.com/jim380/Celory/util"
 )
 
 // NodeStop stops and deletes the docker containers on the local node

@@ -30,11 +30,11 @@ import (
 	"flag"
 	"log"
 
+	"github.com/jim380/Celory/bot"
+	"github.com/jim380/Celory/cmd"
+	"github.com/jim380/Celory/setup"
+	"github.com/jim380/Celory/util"
 	"github.com/joho/godotenv"
-	"github.com/node_tooling/Celo/bot"
-	"github.com/node_tooling/Celo/cmd"
-	"github.com/node_tooling/Celo/setup"
-	"github.com/node_tooling/Celo/util"
 )
 
 func main() {

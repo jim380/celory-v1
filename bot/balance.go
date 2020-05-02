@@ -2,7 +2,7 @@ package bot
 
 import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/node_tooling/Celo/cmd"
+	"github.com/jim380/Celory/cmd"
 )
 
 func (v *validator) getBalance(msg tgbotapi.MessageConfig) {

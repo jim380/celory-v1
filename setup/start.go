@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/node_tooling/Celo/cmd"
-	"github.com/node_tooling/Celo/util"
+	"github.com/jim380/Celory/cmd"
+	"github.com/jim380/Celory/util"
 )
 
 // NodeRun starts the docker containers on the local node

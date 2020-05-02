@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/node_tooling/Celo/cmd"
+	"github.com/jim380/Celory/cmd"
 	"github.com/shopspring/decimal"
 )
 

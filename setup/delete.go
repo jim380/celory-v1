@@ -3,8 +3,8 @@ package setup
 import (
 	"os"
 
-	"github.com/node_tooling/Celo/cmd"
-	"github.com/node_tooling/Celo/util"
+	"github.com/jim380/Celory/cmd"
+	"github.com/jim380/Celory/util"
 )
 
 // ChainDataDel clearss data stored on the local node
