@@ -307,21 +307,30 @@ func Run() {
 			msg.Text = "keyboard closed. Type /open to reopen"
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		case "synced":
-			command, _ := botExecCmdOut("celocli node:synced", msg)
-			msg.Text = string(command)
+			command, err := botExecCmdOut("celocli node:synced", msg)
+			if err != nil {
+				msg.Text = err.Error()
+				break
+			}
+			output := cmd.ParseCmdOutput(command, "string", "^.*\\r?\\n(.*)", 1)
+			msg.Text = fmt.Sprintf("%v", output)
 		case "unlock":
 			msg.Text = "Which account would like to unlock?"
 			msg.ReplyMarkup = unlockKeyboard
 		case "balance":
-			var valGr validatorGr
-			var val validator
+			var valGr validatorGrRG
+			var val validatorRG
 			UpdateBalance(&valGr, msg)
 			UpdateBalance(&val, msg)
 			msgPiece1 := `*gold*: ` + valGr.balance.gold + "\n" + `*lockedGold*: ` + valGr.balance.lockedGold + "\n" + `*usd*: ` + valGr.balance.usd + "\n" + `*non-voting*: ` + valGr.balance.nonVoting + "\n" + `*total*: ` + valGr.balance.total + "\n"
 			msgPiece2 := `*gold*: ` + val.balance.gold + "\n" + `*lockedGold*: ` + val.balance.lockedGold + "\n" + `*usd*: ` + val.balance.usd + "\n" + `*non-voting*: ` + val.balance.nonVoting + "\n" + `*total*: ` + val.balance.total + "\n"
 			msg.Text = "Validator Group\n\n" + msgPiece1 + "--------------\n" + "Validator\n\n" + msgPiece2
 		case "status":
-			command, _ := botExecCmdOut("celocli validator:status --validator $CELO_VALIDATOR_ADDRESS", msg)
+			command, err := botExecCmdOut("celocli validator:status --validator $CELO_VALIDATOR_RG_ADDRESS", msg)
+			if err != nil {
+				msg.Text = err.Error()
+				break
+			}
 			words := cmd.ParseCmdOutput(command, "string", "(true|false)\\s*(true|false)\\s*(\\d*)\\s*(\\d*.)", 0)
 			wordsSplit := strings.Fields(fmt.Sprintf("%v", words))
 			ifElected := wordsSplit[0] + "\n"
@@ -331,8 +340,12 @@ func Run() {
 			message := `*Elected*: ` + ifElected + `*Frontrunner*: ` + ifFrontRunner + `*Proposed*: ` + numProposed + `*Signatures*: ` + perctSigned
 			msg.Text = message
 		case "score":
-			command, _ := botExecCmdOut("celocli validator:show $CELO_VALIDATOR_ADDRESS", msg)
-			words := cmd.ParseCmdOutput(command, "string", "score: (\\d.\\d*)", 1)
+			command, err := botExecCmdOut("celocli validator:show $CELO_VALIDATOR_RG_ADDRESS", msg)
+			if err != nil {
+				msg.Text = err.Error()
+				break
+			}
+			words := cmd.ParseCmdOutput(command, "string", "score: (\\d*)", 1)
 			msg.Text = `*Score: *` + fmt.Sprintf("%v", words)
 		case "lockgold":
 			// update balance before locking
@@ -370,8 +383,13 @@ func Run() {
 				msg.ReplyMarkup = electionVoteKeyboard
 			}
 		case "signing":
-			_, output := botExecCmdOut("celocli validator:signed-blocks --signer $CELO_VALIDATOR_SIGNER_ADDRESS", msg)
-			msg.Text = output
+			command, err := botExecCmdOut("celocli validator:signed-blocks --signer $CELO_VALIDATOR_SIGNER_ADDRESS", msg)
+			if err != nil {
+				msg.Text = err.Error()
+				break
+			}
+			output := cmd.ParseCmdOutput(command, "string", "^.*\\r?\\n\\n(.*\\n.*\\n.*\\n.*)", 1)
+			msg.Text = fmt.Sprintf("%v", output)
 		case "exchange_rate":
 			msg.Text = getExchangeRate(msg)
 		default:
@@ -385,14 +403,17 @@ func Run() {
 }
 
 // botExecCmdOut executes commands and returns command outputs
-func botExecCmdOut(cmd string, msg tgbotapi.MessageConfig) ([]byte, string) {
+func botExecCmdOut(cmd string, msg tgbotapi.MessageConfig) ([]byte, error) {
 	output, err := exec.Command("bash", "-c", cmd).CombinedOutput()
 	if err != nil {
 		msg.Text = fmt.Sprint(err) + ": " + string(output)
-	} else {
-		if string(output) != "" {
-			msg.Text = string(output)
-		}
-	}
-	return output, msg.Text
+		return nil, err
+	} 
+	
+	// if string(output) != "" {
+	
+	// 	msg.Text = string(output)
+	
+	// }
+	return output, nil
 }
