@@ -35,30 +35,6 @@ func (v *validatorGr) unlockAccount(bot *tgbotapi.BotAPI, msg tgbotapi.MessageCo
 	v.unlocked = false
 }
 
-func (v *validatorRG) unlockAccount(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
-	output, _ := botExecCmdOut("celocli account:unlock $CELO_VALIDATOR_RG_ADDRESS --password=$PASSWORD", msg)
-	outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
-	if outputParsed == nil {
-		// botSendMsg(bot, msg, successText("Success"))
-		v.unlocked = true
-		return
-	}
-	// botSendMsg(bot, msg, errText(fmt.Sprintf("%v", outputParsed)))
-	v.unlocked = false
-}
-
-func (v *validatorGrRG) unlockAccount(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
-	output, _ := botExecCmdOut("celocli account:unlock $CELO_VALIDATOR_GROUP_RG_ADDRESS --password=$PASSWORD", msg)
-	outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
-	if outputParsed == nil {
-		// botSendMsg(bot, msg, successText("Success"))
-		v.unlocked = true
-		return
-	}
-	// botSendMsg(bot, msg, errText(fmt.Sprintf("%v", outputParsed)))
-	v.unlocked = false
-}
-
-func Unlock(acc accountManager, bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
+func Unlock(acc accountUnlocker, bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
 	acc.unlockAccount(bot, msg)
 }

@@ -48,12 +48,12 @@ var lockGoldKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 var unlockKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("Validator Group", "valGrUnlock"),
-		tgbotapi.NewInlineKeyboardButtonData("Validator Group RG", "valGrRGUnlock"),
-	),
-	tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("Validator", "valUnlock"),
-		tgbotapi.NewInlineKeyboardButtonData("Validator RG", "valRGUnlock"),
 	),
+	// tgbotapi.NewInlineKeyboardRow(
+	// 	tgbotapi.NewInlineKeyboardButtonData("Validator", "valUnlock"),
+	// 	tgbotapi.NewInlineKeyboardButtonData("Validator Voter", "valVoteUnlock"),
+	// ),
 )
 
 var exchangeUsdKeyboard = tgbotapi.NewInlineKeyboardMarkup(
@@ -95,8 +95,12 @@ type goldManager interface {
 // all accounts
 type accountManager interface {
 	getBalance(msg tgbotapi.MessageConfig)
-	unlockAccount(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig)
 	// transfer
+}
+
+// account unlocker
+type accountUnlocker interface {
+	unlockAccount(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig)
 }
 
 // voter accounts
@@ -181,23 +185,6 @@ func Run() {
 				var val validator
 				Unlock(&val, bot, msg)
 				if val.unlocked {
-					msg.Text = successText("unlocked!")
-				} else {
-					msg.Text = errText("failed!")
-				}
-				break
-			case "valGrRGUnlock":
-				var valGrRG validatorGrRG
-				Unlock(&valGrRG, bot, msg) 
-				if valGrRG.unlocked {
-					msg.Text = successText("unlocked!")
-				} else {
-					msg.Text = errText("failed!")
-				}
-				break
-			case "valRGUnlock":
-				var valRG validatorRG
-				if valRG.unlocked {
 					msg.Text = successText("unlocked!")
 				} else {
 					msg.Text = errText("failed!")
