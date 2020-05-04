@@ -114,18 +114,22 @@ type balance struct {
 
 type validator struct {
 	balance
+	unlocked bool
 }
 
 type validatorGr struct {
 	balance
+	unlocked bool
 }
 
 type validatorRG struct {
 	balance
+	unlocked bool
 }
 
 type validatorGrRG struct {
 	balance
+	unlocked bool
 }
 
 // Run instantiates the bot
@@ -167,15 +171,38 @@ func Run() {
 			case "valGrUnlock":
 				var valGr validatorGr
 				Unlock(&valGr, bot, msg)
+				if valGr.unlocked {
+					msg.Text = successText("unlocked!")
+				} else {
+					msg.Text = errText("failed!")
+				}
+				break
 			case "valUnlock":
 				var val validator
 				Unlock(&val, bot, msg)
+				if val.unlocked {
+					msg.Text = successText("unlocked!")
+				} else {
+					msg.Text = errText("failed!")
+				}
+				break
 			case "valGrRGUnlock":
 				var valGrRG validatorGrRG
-				Unlock(&valGrRG, bot, msg)
+				Unlock(&valGrRG, bot, msg) 
+				if valGrRG.unlocked {
+					msg.Text = successText("unlocked!")
+				} else {
+					msg.Text = errText("failed!")
+				}
+				break
 			case "valRGUnlock":
 				var valRG validatorRG
-				Unlock(&valRG, bot, msg)
+				if valRG.unlocked {
+					msg.Text = successText("unlocked!")
+				} else {
+					msg.Text = errText("failed!")
+				}
+				break
 			case "valGrLockGold":
 				var valGr validatorGr
 				UpdateBalance(&valGr, msg) // update balance before locking
@@ -406,7 +433,7 @@ func Run() {
 func botExecCmdOut(cmd string, msg tgbotapi.MessageConfig) ([]byte, error) {
 	output, err := exec.Command("bash", "-c", cmd).CombinedOutput()
 	if err != nil {
-		msg.Text = fmt.Sprint(err) + ": " + string(output)
+		// msg.Text = fmt.Sprint(err) + ": " + string(output)
 		return nil, err
 	} 
 	
