@@ -2,6 +2,8 @@
 
 A wrapper for [celocli](https://www.npmjs.com/package/@celo/celocli) - a tool for interacting with the Celo Protocol.
 
+### Overview
+![celo](celo.png)
 ### Instructions
 1. `$ git clone https://github.com/jim380/Celory.git` into your `$GOPATH/src/github.com`
 2. `$ go get`
