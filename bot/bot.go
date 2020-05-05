@@ -359,7 +359,7 @@ func Run() {
 				msg.Text = err.Error()
 				break
 			}
-			words := cmd.ParseCmdOutput(command, "string", "score: (\\d*)", 1)
+			words := cmd.ParseCmdOutput(command, "string", "score: (\\S*)", 1)
 			msg.Text = `*Score: *` + fmt.Sprintf("%v", words)
 		case "lockgold":
 			// update balance before locking
