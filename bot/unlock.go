@@ -8,7 +8,7 @@ import (
 )
 
 func (v *validator) unlockAccount(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
-	output, _ := botExecCmdOut("celocli account:unlock $CELO_VALIDATOR_ADDRESS --password=$PASSWORD", msg)
+	output, _ := botExecCmdOut("celocli account:unlock $CELO_VALIDATOR_ADDRESS --password=$PASSWORD")
 	outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
 	if outputParsed == nil {
 		v.unlocked = true
@@ -18,7 +18,7 @@ func (v *validator) unlockAccount(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConf
 }
 
 func (v *validatorGr) unlockAccount(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
-	output, _ := botExecCmdOut("celocli account:unlock $CELO_VALIDATOR_GROUP_ADDRESS --password=$PASSWORD", msg)
+	output, _ := botExecCmdOut("celocli account:unlock $CELO_VALIDATOR_GROUP_ADDRESS --password=$PASSWORD")
 	outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
 	if outputParsed == nil {
 		v.unlocked = true

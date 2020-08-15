@@ -13,22 +13,22 @@ func (v *validatorGr) exchanegUSDToGold(bot *tgbotapi.BotAPI, msg tgbotapi.Messa
 	botSendMsg(bot, msg, boldText("Exchange USD to Gold from validator group was requested"))
 	usdAvailable, _ := decimal.NewFromString(v.usd)
 	if perct == 100 {
-		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		msg.Text = v.exchangeDollars(bot, msg, usdAvailable)
 		botSendMsg(bot, msg, msg.Text)
 	} else if perct == 50 {
 		dividend, _ := decimal.NewFromString("2")
 		usdAvailable = usdAvailable.DivRound(dividend, 18)
-		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		msg.Text = v.exchangeDollars(bot, msg, usdAvailable)
 		botSendMsg(bot, msg, msg.Text)
 	} else if perct == 25 {
 		dividend, _ := decimal.NewFromString("4")
 		usdAvailable = usdAvailable.DivRound(dividend, 18)
-		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		msg.Text = v.exchangeDollars(bot, msg, usdAvailable)
 		botSendMsg(bot, msg, msg.Text)
 	} else if perct == 75 {
 		dividend, _ := decimal.NewFromString("1.333333")
 		usdAvailable = usdAvailable.DivRound(dividend, 18)
-		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		msg.Text = v.exchangeDollars(bot, msg, usdAvailable)
 		botSendMsg(bot, msg, msg.Text)
 	}
 }
@@ -38,32 +38,32 @@ func (v *validator) exchanegUSDToGold(bot *tgbotapi.BotAPI, msg tgbotapi.Message
 	botSendMsg(bot, msg, boldText("Exchange USD to Gold from validator was requested"))
 	usdAvailable, _ := decimal.NewFromString(v.usd)
 	if perct == 100 {
-		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		msg.Text = v.exchangeDollars(bot, msg, usdAvailable)
 		botSendMsg(bot, msg, msg.Text)
 	} else if perct == 50 {
 		dividend, _ := decimal.NewFromString("2")
 		usdAvailable = usdAvailable.DivRound(dividend, 18)
-		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		msg.Text = v.exchangeDollars(bot, msg, usdAvailable)
 		botSendMsg(bot, msg, msg.Text)
 	} else if perct == 25 {
 		dividend, _ := decimal.NewFromString("4")
 		usdAvailable = usdAvailable.DivRound(dividend, 18)
-		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		msg.Text = v.exchangeDollars(bot, msg, usdAvailable)
 		botSendMsg(bot, msg, msg.Text)
 	} else if perct == 75 {
 		dividend, _ := decimal.NewFromString("1.333333")
 		usdAvailable = usdAvailable.DivRound(dividend, 18)
-		msg.Text = v.exchangeCmdExecute(bot, msg, usdAvailable)
+		msg.Text = v.exchangeDollars(bot, msg, usdAvailable)
 		botSendMsg(bot, msg, msg.Text)
 	}
 }
 
-func (v *validatorGr) exchangeCmdExecute(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount decimal.Decimal) string {
+func (v *validatorGr) exchangeDollars(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount decimal.Decimal) string {
 	zeroValue, _ := decimal.NewFromString("0")
 	if amount.Cmp(zeroValue) == 1 {
 		toExchange := amount.String()
 		botSendMsg(bot, msg, boldText("Exchanging "+toExchange+" usd from validator group"))
-		output, _ := botExecCmdOut("celocli exchange:dollars --from $CELO_VALIDATOR_GROUP_ADDRESS --value "+toExchange, msg)
+		output, _ := botExecCmdOut("celocli exchange:dollars --from $CELO_VALIDATOR_GROUP_ADDRESS --value " + toExchange)
 		outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
 		if outputParsed == nil {
 			return successText("Success")
@@ -73,12 +73,42 @@ func (v *validatorGr) exchangeCmdExecute(bot *tgbotapi.BotAPI, msg tgbotapi.Mess
 	return warnText("Don't bite more than you can chew! You only have " + amount.String() + " usd available")
 }
 
-func (v *validator) exchangeCmdExecute(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount decimal.Decimal) string {
+func (v *validatorGrBf) exchangeDollars(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount decimal.Decimal) string {
+	zeroValue, _ := decimal.NewFromString("0")
+	if amount.Cmp(zeroValue) == 1 {
+		toExchange := amount.String()
+		botSendMsg(bot, msg, boldText("Exchanging "+toExchange+" usd from validator group"))
+		output, _ := botExecCmdOut("celocli exchange:dollars --from $CELO_VALIDATOR_GROUP_RELEASE_GOLD_BENEFICIARY_ADDRESS --value " + toExchange)
+		outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
+		if outputParsed == nil {
+			return successText("Success")
+		}
+		return errText(fmt.Sprintf("%v", outputParsed))
+	}
+	return warnText("Don't bite more than you can chew! You only have " + amount.String() + " usd available")
+}
+
+func (v *validator) exchangeDollars(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount decimal.Decimal) string {
 	zeroValue, _ := decimal.NewFromString("0")
 	if amount.Cmp(zeroValue) == 1 {
 		toExchange := amount.String()
 		botSendMsg(bot, msg, boldText("Exchanging "+toExchange+" usd from validator"))
-		output, _ := botExecCmdOut("celocli exchange:dollars --from $CELO_VALIDATOR_ADDRESS --value "+toExchange, msg)
+		output, _ := botExecCmdOut("celocli exchange:dollars --from $CELO_VALIDATOR_ADDRESS --value " + toExchange)
+		outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
+		if outputParsed == nil {
+			return successText("Success")
+		}
+		return errText(fmt.Sprintf("%v", outputParsed))
+	}
+	return warnText("Don't bite more than you can chew! You only have " + amount.String() + " usd available")
+}
+
+func (v *validatorBf) exchangeDollars(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, amount decimal.Decimal) string {
+	zeroValue, _ := decimal.NewFromString("0")
+	if amount.Cmp(zeroValue) == 1 {
+		toExchange := amount.String()
+		botSendMsg(bot, msg, boldText("Exchanging "+toExchange+" usd from validator group"))
+		output, _ := botExecCmdOut("celocli exchange:dollars --from $CELO_VALIDATOR_RELEASE_GOLD_BENEFICIARY_ADDRESS --value " + toExchange)
 		outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
 		if outputParsed == nil {
 			return successText("Success")
@@ -89,7 +119,7 @@ func (v *validator) exchangeCmdExecute(bot *tgbotapi.BotAPI, msg tgbotapi.Messag
 }
 
 func getExchangeRate(msg tgbotapi.MessageConfig) string {
-	output, _ := botExecCmdOut("celocli exchange:show", msg)
+	output, _ := botExecCmdOut("celocli exchange:show")
 	cGold := cmd.ParseCmdOutput(output, "string", "(\\d.*) cGLD =>", 1)
 	cUsd := cmd.ParseCmdOutput(output, "string", "=> (\\d.*) cUSD", 1)
 	cGoldDecimal, _ := decimal.NewFromString(fmt.Sprintf("%v", cGold))

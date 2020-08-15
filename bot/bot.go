@@ -29,7 +29,7 @@ var mainKeyboard = tgbotapi.NewReplyKeyboard(
 	),
 	tgbotapi.NewKeyboardButtonRow(
 		tgbotapi.NewKeyboardButton("/unlock"),
-		tgbotapi.NewKeyboardButton("/transfer"),
+		tgbotapi.NewKeyboardButton("/reinvest"),
 		tgbotapi.NewKeyboardButton("/close"),
 	),
 )
@@ -38,6 +38,19 @@ var lockGoldKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("Validator Group All", "valGrLockGold"),
 		tgbotapi.NewInlineKeyboardButtonData("Validator All", "valLockGold"),
+	),
+	// tgbotapi.NewInlineKeyboardRow(
+	// 	tgbotapi.NewInlineKeyboardButtonData("Validator Amount", "valAmount"),
+	// 	tgbotapi.NewInlineKeyboardButtonData("Validator Group Amount", "valGrAmount"),
+	// ),
+)
+
+var transferKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+	tgbotapi.NewInlineKeyboardRow(
+		tgbotapi.NewInlineKeyboardButtonData("USD - Validator Group RG to Beneficiary", "valGrRGTransfer"),
+		tgbotapi.NewInlineKeyboardButtonData("USD - Validator RG to Beneficiary", "valRGTransfer"),
+		tgbotapi.NewInlineKeyboardButtonData("Celo - Validator Group Beneficiary to RG", "valGrBfTransfer"),
+		tgbotapi.NewInlineKeyboardButtonData("Celo - Validator Beneficiary to RG", "valBfTransfer"),
 	),
 	// tgbotapi.NewInlineKeyboardRow(
 	// 	tgbotapi.NewInlineKeyboardButtonData("Validator Amount", "valAmount"),
@@ -87,6 +100,11 @@ type exchange interface {
 	exchanegUSDToGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, perct uint16)
 }
 
+// beneficiary accounts
+type transfer interface {
+	transfer(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig)
+}
+
 // RG accounts
 type goldManager interface {
 	lockGold(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig)
@@ -94,7 +112,7 @@ type goldManager interface {
 
 // all accounts
 type accountManager interface {
-	getBalance(msg tgbotapi.MessageConfig)
+	getBalance()
 	// transfer
 }
 
@@ -132,6 +150,16 @@ type validatorRG struct {
 }
 
 type validatorGrRG struct {
+	balance
+	unlocked bool
+}
+
+type validatorBf struct {
+	balance
+	unlocked bool
+}
+
+type validatorGrBf struct {
 	balance
 	unlocked bool
 }
@@ -190,19 +218,47 @@ func Run() {
 					msg.Text = errText("failed!")
 				}
 				break
+			case "valGrRGTransfer":
+				var valGrRG validatorGrRG
+				xfer(&valGrRG, bot, msg)
+				updateBalance(&valGrRG)
+				msgPiece := `usd: ` + valGrRG.balance.usd
+				msg.Text = boldText("Validator Group RG Balance After Tranferring") + "\n\n" + msgPiece
+				break
+			case "valRGTransfer":
+				var valRG validatorRG
+				xfer(&valRG, bot, msg)
+				updateBalance(&valRG)
+				msgPiece := `usd: ` + valRG.balance.usd
+				msg.Text = boldText("Validator RG Balance After Tranferring") + "\n\n" + msgPiece
+				break
+			case "valGrBfTransfer":
+				var valGrBf validatorGrBf
+				xfer(&valGrBf, bot, msg)
+				updateBalance(&valGrBf)
+				msgPiece := `gold: ` + valGrBf.balance.gold
+				msg.Text = boldText("Validator Group Beneficiary Balance After Tranferring") + "\n\n" + msgPiece
+				break
+			case "valBfTransfer":
+				var valBf validatorBf
+				xfer(&valBf, bot, msg)
+				updateBalance(&valBf)
+				msgPiece := `gold: ` + valBf.balance.gold
+				msg.Text = boldText("Validator Beneficiary Balance After Tranferring") + "\n\n" + msgPiece
+				break
 			case "valGrLockGold":
 				var valGr validatorGr
-				updateBalance(&valGr, msg) // update balance before locking
+				updateBalance(&valGr) // update balance before locking
 				lockGoldRun(&valGr, bot, msg)
-				updateBalance(&valGr, msg) // update balance after locking
+				updateBalance(&valGr) // update balance after locking
 				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `lockedGold: ` + valGr.balance.lockedGold
 				msg.Text = boldText("Validator Group Balance After Locking") + "\n\n" + msgPiece
 				break
 			case "valLockGold":
 				var val validator
-				updateBalance(&val, msg) // update balance before locking
+				updateBalance(&val) // update balance before locking
 				lockGoldRun(&val, bot, msg)
-				updateBalance(&val, msg) // update balance after locking
+				updateBalance(&val) // update balance after locking
 				msgPiece := `gold: ` + val.balance.gold + "\n" + `lockedGold: ` + val.balance.lockedGold
 				msg.Text = boldText("Validator Balance After Locking") + "\n\n" + msgPiece
 				break
@@ -214,81 +270,81 @@ func Run() {
 				break
 			case "valGrAllUsd":
 				var valGr validatorGr
-				updateBalance(&valGr, msg) // update balance before exchange
+				updateBalance(&valGr) // update balance before exchange
 				exchangeUSDToGoldRun(&valGr, bot, msg, 100)
-				updateBalance(&valGr, msg) // update balance after exchange
+				updateBalance(&valGr) // update balance after exchange
 				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `usd: ` + valGr.balance.usd
 				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valGrHalfUsd":
 				var valGr validatorGr
-				updateBalance(&valGr, msg) // update balance before exchange
+				updateBalance(&valGr) // update balance before exchange
 				exchangeUSDToGoldRun(&valGr, bot, msg, 50)
-				updateBalance(&valGr, msg) // update balance after exchange
+				updateBalance(&valGr) // update balance after exchange
 				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `usd: ` + valGr.balance.usd
 				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valGrOneForthUsd":
 				var valGr validatorGr
-				updateBalance(&valGr, msg) // update balance before exchange
+				updateBalance(&valGr) // update balance before exchange
 				exchangeUSDToGoldRun(&valGr, bot, msg, 25)
-				updateBalance(&valGr, msg) // update balance after exchange
+				updateBalance(&valGr) // update balance after exchange
 				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `usd: ` + valGr.balance.usd
 				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valGrFourThirdsUsd":
 				var valGr validatorGr
-				updateBalance(&valGr, msg) // update balance before exchange
+				updateBalance(&valGr) // update balance before exchange
 				exchangeUSDToGoldRun(&valGr, bot, msg, 75)
-				updateBalance(&valGr, msg) // update balance after exchange
+				updateBalance(&valGr) // update balance after exchange
 				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `usd: ` + valGr.balance.usd
 				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valAllUsd":
 				var val validator
-				updateBalance(&val, msg) // update balance before exchange
+				updateBalance(&val) // update balance before exchange
 				exchangeUSDToGoldRun(&val, bot, msg, 100)
-				updateBalance(&val, msg) // update balance after exchange
+				updateBalance(&val) // update balance after exchange
 				msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
 				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valHalfUsd":
 				var val validator
-				updateBalance(&val, msg) // update balance before exchange
+				updateBalance(&val) // update balance before exchange
 				exchangeUSDToGoldRun(&val, bot, msg, 50)
-				updateBalance(&val, msg) // update balance after exchange
+				updateBalance(&val) // update balance after exchange
 				msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
 				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valOneForthUsd":
 				var val validator
-				updateBalance(&val, msg) // update balance before exchange
+				updateBalance(&val) // update balance before exchange
 				exchangeUSDToGoldRun(&val, bot, msg, 25)
-				updateBalance(&val, msg) // update balance after exchange
+				updateBalance(&val) // update balance after exchange
 				msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
 				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valFourThirdsUsd":
 				var val validator
-				updateBalance(&val, msg) // update balance before exchange
+				updateBalance(&val) // update balance before exchange
 				exchangeUSDToGoldRun(&val, bot, msg, 75)
-				updateBalance(&val, msg) // update balance after exchange
+				updateBalance(&val) // update balance after exchange
 				msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
 				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valGrVote":
 				var valGr validatorGr
-				updateBalance(&valGr, msg) // update balance before voting
+				updateBalance(&valGr) // update balance before voting
 				voteRun(&valGr, bot, msg)
-				updateBalance(&valGr, msg) // update balance after voting
+				updateBalance(&valGr) // update balance after voting
 				msgPiece := `Non-voting: ` + valGr.balance.nonVoting
 				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
 				break
 			case "valVote":
 				var val validator
-				updateBalance(&val, msg) // update balance before voting
+				updateBalance(&val) // update balance before voting
 				voteRun(&val, bot, msg)
-				updateBalance(&val, msg) // update balance after voting
+				updateBalance(&val) // update balance after voting
 				msgPiece := `Non-voting: ` + val.balance.nonVoting
 				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
 				break
@@ -321,7 +377,7 @@ func Run() {
 			msg.Text = "keyboard closed. Type /open to reopen"
 			msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		case "synced":
-			command, err := botExecCmdOut("celocli node:synced", msg)
+			command, err := botExecCmdOut("celocli node:synced")
 			if err != nil {
 				msg.Text = err.Error()
 				break
@@ -334,13 +390,13 @@ func Run() {
 		case "balance":
 			var valGr validatorGrRG
 			var val validatorRG
-			updateBalance(&valGr, msg)
-			updateBalance(&val, msg)
+			updateBalance(&valGr)
+			updateBalance(&val)
 			msgPiece1 := `*gold*: ` + valGr.balance.gold + "\n" + `*lockedGold*: ` + valGr.balance.lockedGold + "\n" + `*usd*: ` + valGr.balance.usd + "\n" + `*non-voting*: ` + valGr.balance.nonVoting + "\n" + `*total*: ` + valGr.balance.total + "\n"
 			msgPiece2 := `*gold*: ` + val.balance.gold + "\n" + `*lockedGold*: ` + val.balance.lockedGold + "\n" + `*usd*: ` + val.balance.usd + "\n" + `*non-voting*: ` + val.balance.nonVoting + "\n" + `*total*: ` + val.balance.total + "\n"
 			msg.Text = "Validator Group\n\n" + msgPiece1 + "--------------\n" + "Validator\n\n" + msgPiece2
 		case "status":
-			command, err := botExecCmdOut("celocli validator:status --validator $CELO_VALIDATOR_RG_ADDRESS", msg)
+			command, err := botExecCmdOut("celocli validator:status --validator $CELO_VALIDATOR_RG_ADDRESS")
 			if err != nil {
 				msg.Text = err.Error()
 				break
@@ -354,19 +410,34 @@ func Run() {
 			message := `*Elected*: ` + ifElected + `*Frontrunner*: ` + ifFrontRunner + `*Proposed*: ` + numProposed + `*Signatures*: ` + perctSigned
 			msg.Text = message
 		case "score":
-			command, err := botExecCmdOut("celocli validator:show $CELO_VALIDATOR_RG_ADDRESS", msg)
+			command, err := botExecCmdOut("celocli validator:show $CELO_VALIDATOR_RG_ADDRESS")
 			if err != nil {
 				msg.Text = err.Error()
 				break
 			}
 			words := cmd.ParseCmdOutput(command, "string", "score: (\\S*)", 1)
 			msg.Text = `*Score: *` + fmt.Sprintf("%v", words)
+		case "transfer":
+			var valGrRG validatorGrRG
+			var valRG validatorRG
+			var valGrBf validatorGrBf
+			var valBf validatorBf
+			updateBalance(&valGrRG)
+			updateBalance(&valRG)
+			updateBalance(&valGrBf)
+			updateBalance(&valBf)
+			msgPiece1 := `*gold*: ` + valGrRG.balance.gold + "\n" + `*usd*: ` + valGrRG.balance.usd + "\n"
+			msgPiece2 := `*gold*: ` + valRG.balance.gold + `*usd*: ` + valRG.balance.usd + "\n"
+			msgPiece3 := `*gold*: ` + valGrBf.balance.gold + "\n" + `*usd*: ` + valGrBf.balance.usd + "\n"
+			msgPiece4 := `*gold*: ` + valBf.balance.gold + `*usd*: ` + valBf.balance.usd + "\n"
+			msg.Text = "Validator Group RG\n\n" + msgPiece1 + "--------------\n" + "Validator RG\n\n" + msgPiece2 + "--------------\n" + "Validator Group Beneficiary\n\n" + msgPiece3 + "--------------\n" + "Validator Beneficiary\n\n" + msgPiece4
+			msg.ReplyMarkup = transferKeyboard
 		case "lockgold":
 			// update balance before locking
 			var valGr validatorGr
 			var val validator
-			updateBalance(&valGr, msg)
-			updateBalance(&val, msg)
+			updateBalance(&valGr)
+			updateBalance(&val)
 			msgPiece1 := boldText("Gold Available\n") + "Validator Group: " + valGr.balance.gold + "\n"
 			msgPiece2 := "Validator: " + val.balance.gold + "\n"
 			msgPiece3 := "\nHow much would you like to lock?"
@@ -375,8 +446,8 @@ func Run() {
 		case "exchange":
 			var valGr validatorGr
 			var val validator
-			updateBalance(&valGr, msg)
-			updateBalance(&val, msg)
+			updateBalance(&valGr)
+			updateBalance(&val)
 			msgPiece1 := boldText("USD Available\n") + "Validator Group: " + valGr.balance.usd + "\n"
 			msgPiece2 := "Validator: " + val.balance.usd + "\n"
 			msgPiece3 := "\nHow much would you like to exchange?\n"
@@ -385,8 +456,8 @@ func Run() {
 		case "vote":
 			var valGr validatorGr
 			var val validator
-			updateBalance(&valGr, msg)
-			updateBalance(&val, msg)
+			updateBalance(&valGr)
+			updateBalance(&val)
 			if valGr.balance.nonVoting == "" && val.balance.nonVoting == "" {
 				msg.Text = "You have no non-voting lockedGold available"
 			} else {
@@ -397,7 +468,7 @@ func Run() {
 				msg.ReplyMarkup = electionVoteKeyboard
 			}
 		case "signing":
-			command, err := botExecCmdOut("celocli validator:signed-blocks --signer $CELO_VALIDATOR_SIGNER_ADDRESS", msg)
+			command, err := botExecCmdOut("celocli validator:signed-blocks --signer $CELO_VALIDATOR_SIGNER_ADDRESS")
 			if err != nil {
 				msg.Text = err.Error()
 				break
@@ -417,7 +488,7 @@ func Run() {
 }
 
 // botExecCmdOut executes commands and returns command outputs
-func botExecCmdOut(cmd string, msg tgbotapi.MessageConfig) ([]byte, error) {
+func botExecCmdOut(cmd string) ([]byte, error) {
 	output, err := exec.Command("bash", "-c", cmd).CombinedOutput()
 	if err != nil {
 		// msg.Text = fmt.Sprint(err) + ": " + string(output)

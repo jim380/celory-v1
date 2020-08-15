@@ -16,7 +16,7 @@ func (v *validatorGr) vote(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
 	if nonvotingGoldAvailable.Cmp(zeroValue) == 1 {
 		toVote := nonvotingGoldAvailable.String()
 		botSendMsg(bot, msg, boldText("Casting "+toVote+" votes from validator group"))
-		output, _ := botExecCmdOut("celocli election:vote --from $CELO_VALIDATOR_GROUP_ADDRESS --for $CELO_VALIDATOR_GROUP_ADDRESS --value "+toVote, msg)
+		output, _ := botExecCmdOut("celocli election:vote --from $CELO_VALIDATOR_GROUP_ADDRESS --for $CELO_VALIDATOR_GROUP_ADDRESS --value " + toVote)
 		outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
 		if outputParsed == nil {
 			msg.Text = successText("Success")
@@ -38,7 +38,7 @@ func (v *validator) vote(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig) {
 	if nonvotingGoldAvailable.Cmp(zeroValue) == 1 {
 		toVote := nonvotingGoldAvailable.String()
 		botSendMsg(bot, msg, boldText("Casting "+toVote+" votes from validator"))
-		output, _ := botExecCmdOut("celocli election:vote --from $CELO_VALIDATOR_ADDRESS --for $CELO_VALIDATOR_GROUP_ADDRESS --value "+toVote, msg)
+		output, _ := botExecCmdOut("celocli election:vote --from $CELO_VALIDATOR_ADDRESS --for $CELO_VALIDATOR_GROUP_ADDRESS --value " + toVote)
 		outputParsed := cmd.ParseCmdOutput(output, "string", "Error: Returned (.*)", 1)
 		if outputParsed == nil {
 			msg.Text = successText("Success")
