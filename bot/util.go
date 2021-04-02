@@ -41,7 +41,7 @@ func botSendMsg(bot *tgbotapi.BotAPI, msg tgbotapi.MessageConfig, msgTxt string)
 	}
 }
 
-func isZero(target interface{}, val string) string {
+func toString(target interface{}) (val string) {
 	value, _ := decimal.NewFromString(fmt.Sprintf("%v", target))
 	if value.IsZero() {
 		val = "0"

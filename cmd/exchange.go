@@ -9,8 +9,11 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-func UsdToGold(target []byte, role string) {
-	amountUsd := ParseAmount(target, "usd")
+func UsdToGold(target []byte, role string) error {
+	amountUsd, err := parseAmount(target, "usd")
+	if err != nil {
+		return err
+	}
 	message := "\nHow much would you like to exchange?\n1) All\n2) A specific amount\n3) Move on"
 	fmt.Printf(message)
 	fmt.Printf("\n=> ")
@@ -47,12 +50,13 @@ func UsdToGold(target []byte, role string) {
 				break
 			}
 		case "3":
-			return
+			break
 		default:
 			panic("invalid input")
 		}
 		break
 	}
+	return nil
 }
 
 func UsdToGoldExecute(amount string, role string) {

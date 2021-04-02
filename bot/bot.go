@@ -112,7 +112,7 @@ type goldManager interface {
 
 // all accounts
 type accountManager interface {
-	getBalance()
+	getBalance() error
 	// transfer
 }
 
@@ -208,7 +208,7 @@ func Run() {
 				} else {
 					msg.Text = errText("failed!")
 				}
-				break
+				// break
 			case "valUnlock":
 				var val validator
 				unlock(&val, bot, msg)
@@ -217,35 +217,35 @@ func Run() {
 				} else {
 					msg.Text = errText("failed!")
 				}
-				break
+				// break
 			case "valGrRGTransfer":
 				var valGrRG validatorGrRG
 				xfer(&valGrRG, bot, msg)
 				updateBalance(&valGrRG)
 				msgPiece := `usd: ` + valGrRG.balance.usd
 				msg.Text = boldText("Validator Group RG Balance After Tranferring") + "\n\n" + msgPiece
-				break
+				// break
 			case "valRGTransfer":
 				var valRG validatorRG
 				xfer(&valRG, bot, msg)
 				updateBalance(&valRG)
 				msgPiece := `usd: ` + valRG.balance.usd
 				msg.Text = boldText("Validator RG Balance After Tranferring") + "\n\n" + msgPiece
-				break
+				// break
 			case "valGrBfTransfer":
 				var valGrBf validatorGrBf
 				xfer(&valGrBf, bot, msg)
 				updateBalance(&valGrBf)
 				msgPiece := `gold: ` + valGrBf.balance.gold
 				msg.Text = boldText("Validator Group Beneficiary Balance After Tranferring") + "\n\n" + msgPiece
-				break
+				// break
 			case "valBfTransfer":
 				var valBf validatorBf
 				xfer(&valBf, bot, msg)
 				updateBalance(&valBf)
 				msgPiece := `gold: ` + valBf.balance.gold
 				msg.Text = boldText("Validator Beneficiary Balance After Tranferring") + "\n\n" + msgPiece
-				break
+				// break
 			case "valGrLockGold":
 				var valGr validatorGr
 				updateBalance(&valGr) // update balance before locking
@@ -253,7 +253,7 @@ func Run() {
 				updateBalance(&valGr) // update balance after locking
 				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `lockedGold: ` + valGr.balance.lockedGold
 				msg.Text = boldText("Validator Group Balance After Locking") + "\n\n" + msgPiece
-				break
+				// break
 			case "valLockGold":
 				var val validator
 				updateBalance(&val) // update balance before locking
@@ -261,13 +261,13 @@ func Run() {
 				updateBalance(&val) // update balance after locking
 				msgPiece := `gold: ` + val.balance.gold + "\n" + `lockedGold: ` + val.balance.lockedGold
 				msg.Text = boldText("Validator Balance After Locking") + "\n\n" + msgPiece
-				break
+				// break
 			case "valAmount":
 				msg.Text = "Locking a specific amount from validator was requested"
-				break
+				// break
 			case "valGrAmount":
 				msg.Text = "Locking a specific amount from validator group was requested"
-				break
+				// break
 			case "valGrAllUsd":
 				var valGr validatorGr
 				updateBalance(&valGr) // update balance before exchange
@@ -275,7 +275,7 @@ func Run() {
 				updateBalance(&valGr) // update balance after exchange
 				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `usd: ` + valGr.balance.usd
 				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
-				break
+				// break
 			case "valGrHalfUsd":
 				var valGr validatorGr
 				updateBalance(&valGr) // update balance before exchange
@@ -283,7 +283,7 @@ func Run() {
 				updateBalance(&valGr) // update balance after exchange
 				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `usd: ` + valGr.balance.usd
 				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
-				break
+				// break
 			case "valGrOneForthUsd":
 				var valGr validatorGr
 				updateBalance(&valGr) // update balance before exchange
@@ -291,7 +291,7 @@ func Run() {
 				updateBalance(&valGr) // update balance after exchange
 				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `usd: ` + valGr.balance.usd
 				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
-				break
+				// break
 			case "valGrFourThirdsUsd":
 				var valGr validatorGr
 				updateBalance(&valGr) // update balance before exchange
@@ -299,7 +299,7 @@ func Run() {
 				updateBalance(&valGr) // update balance after exchange
 				msgPiece := `gold: ` + valGr.balance.gold + "\n" + `usd: ` + valGr.balance.usd
 				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
-				break
+				// break
 			case "valAllUsd":
 				var val validator
 				updateBalance(&val) // update balance before exchange
@@ -307,7 +307,7 @@ func Run() {
 				updateBalance(&val) // update balance after exchange
 				msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
 				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
-				break
+				// break
 			case "valHalfUsd":
 				var val validator
 				updateBalance(&val) // update balance before exchange
@@ -315,7 +315,7 @@ func Run() {
 				updateBalance(&val) // update balance after exchange
 				msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
 				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
-				break
+				// break
 			case "valOneForthUsd":
 				var val validator
 				updateBalance(&val) // update balance before exchange
@@ -323,7 +323,7 @@ func Run() {
 				updateBalance(&val) // update balance after exchange
 				msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
 				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
-				break
+				// break
 			case "valFourThirdsUsd":
 				var val validator
 				updateBalance(&val) // update balance before exchange
@@ -331,7 +331,7 @@ func Run() {
 				updateBalance(&val) // update balance after exchange
 				msgPiece := `gold: ` + val.balance.gold + "\n" + `usd: ` + val.balance.usd
 				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
-				break
+				// break
 			case "valGrVote":
 				var valGr validatorGr
 				updateBalance(&valGr) // update balance before voting
@@ -339,7 +339,7 @@ func Run() {
 				updateBalance(&valGr) // update balance after voting
 				msgPiece := `Non-voting: ` + valGr.balance.nonVoting
 				msg.Text = boldText("Validator Group Balance After Exhchange") + "\n\n" + msgPiece
-				break
+				// break
 			case "valVote":
 				var val validator
 				updateBalance(&val) // update balance before voting
@@ -347,10 +347,10 @@ func Run() {
 				updateBalance(&val) // update balance after voting
 				msgPiece := `Non-voting: ` + val.balance.nonVoting
 				msg.Text = boldText("Validator Balance After Exhchange") + "\n\n" + msgPiece
-				break
+				// break
 			case "cancel":
 				msg.Text = "Back to back menu"
-				break
+				// break
 			}
 
 			// send final message out
@@ -382,7 +382,7 @@ func Run() {
 				msg.Text = err.Error()
 				break
 			}
-			output := cmd.ParseCmdOutput(command, "string", "^.*\\r?\\n(.*)", 1)
+			output := cmd.ParseCmdOutput(command, "string", "^.*\\r?(.*)", 0)
 			msg.Text = fmt.Sprintf("%v", output)
 		case "unlock":
 			msg.Text = "Which account would like to unlock?"
@@ -390,8 +390,13 @@ func Run() {
 		case "balance":
 			var valGr validatorGrRG
 			var val validatorRG
-			updateBalance(&valGr)
-			updateBalance(&val)
+			if err := updateBalance(&valGr); err != nil {
+				log.Fatal(err)
+			}
+			if err := updateBalance(&val); err != nil {
+				log.Fatal(err)
+			}
+			// updateBalance(&val)
 			msgPiece1 := `*gold*: ` + valGr.balance.gold + "\n" + `*lockedGold*: ` + valGr.balance.lockedGold + "\n" + `*usd*: ` + valGr.balance.usd + "\n" + `*non-voting*: ` + valGr.balance.nonVoting + "\n" + `*total*: ` + valGr.balance.total + "\n"
 			msgPiece2 := `*gold*: ` + val.balance.gold + "\n" + `*lockedGold*: ` + val.balance.lockedGold + "\n" + `*usd*: ` + val.balance.usd + "\n" + `*non-voting*: ` + val.balance.nonVoting + "\n" + `*total*: ` + val.balance.total + "\n"
 			msg.Text = "Validator Group\n\n" + msgPiece1 + "--------------\n" + "Validator\n\n" + msgPiece2
@@ -401,13 +406,14 @@ func Run() {
 				msg.Text = err.Error()
 				break
 			}
-			words := cmd.ParseCmdOutput(command, "string", "(true|false)\\s*(true|false)\\s*(\\d*)\\s*(\\d*.)", 0)
+			words := cmd.ParseCmdOutput(command, "string", "(true|false)\\s*(true|false)\\s*(\\d*)\\s*(\\d*.*)", 0)
 			wordsSplit := strings.Fields(fmt.Sprintf("%v", words))
+			// fmt.Println("TEST PRINT: ", &wordsSplit)
 			ifElected := wordsSplit[0] + "\n"
 			ifFrontRunner := wordsSplit[1] + "\n"
-			numProposed := wordsSplit[2] + "\n"
-			perctSigned := wordsSplit[3] + "\n"
-			message := `*Elected*: ` + ifElected + `*Frontrunner*: ` + ifFrontRunner + `*Proposed*: ` + numProposed + `*Signatures*: ` + perctSigned
+			// numProposed := wordsSplit[2] + "\n"
+			perctSigned := wordsSplit[2] + "\n"
+			message := `*Elected*: ` + ifElected + `*Frontrunner*: ` + ifFrontRunner + `*Signatures*: ` + perctSigned
 			msg.Text = message
 		case "score":
 			command, err := botExecCmdOut("celocli validator:show $CELO_VALIDATOR_RG_ADDRESS")

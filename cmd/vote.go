@@ -10,8 +10,11 @@ import (
 )
 
 // lockGold locks a specific amount of gold available
-func elecVote(target []byte, role string) {
-	nonVoting := ParseAmount(target, "nonVoting")
+func elecVote(target []byte, role string) error {
+	nonVoting, err := parseAmount(target, "nonVoting")
+	if err != nil {
+		return err
+	}
 	message := "\nHow many votes would you like to cast?\n1) All\n2) A specific amount\n3) Move on"
 	fmt.Printf(message)
 	fmt.Printf("\n=> ")
@@ -42,12 +45,13 @@ func elecVote(target []byte, role string) {
 				break
 			}
 		case "3":
-			return
+			break
 		default:
 			panic("Invalid input")
 		}
 		break
 	}
+	return nil
 }
 
 func voteAmount(amount string, role string) {

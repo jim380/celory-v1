@@ -10,8 +10,11 @@ import (
 )
 
 // lockGold locks a specific amount of gold available
-func lockGold(target []byte, role string) {
-	amountGold := ParseAmount(target, "gold")
+func lockGold(target []byte, role string) error {
+	amountGold, err := parseAmount(target, "gold")
+	if err != nil {
+		return err
+	}
 	message := "\nHow much would you like to lock?\n1) All\n2) A specific amount\n3) Move on"
 	fmt.Printf(message)
 	fmt.Printf("\n=> ")
@@ -41,12 +44,13 @@ func lockGold(target []byte, role string) {
 				break
 			}
 		case "3":
-			return
+			break
 		default:
 			panic("Invalid input")
 		}
 		break
 	}
+	return nil
 }
 
 func lockGoldAmount(amount string, role string) {
