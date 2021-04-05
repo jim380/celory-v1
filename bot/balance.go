@@ -3,6 +3,7 @@ package bot
 import (
 	"errors"
 	"fmt"
+	"reflect"
 	"strconv"
 
 	"github.com/jim380/Celory/cmd"
@@ -39,18 +40,34 @@ func (v *validatorRG) getBalance() error {
 	return nil
 }
 
-func (v *validatorBf) getBalance() error {
+func (b *beneficiaries) getBalance() error {
+	var valGrBf validatorGrBf
+	if reflect.TypeOf(b) == reflect.TypeOf(valGrBf) {
+		target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_RELEASE_GOLD_BENEFICIARY_ADDRESS")
+		target1, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_GROUP_RELEASE_GOLD_BENEFICIARY_ADDRESS")
+		bal, err := parseBalances(target, target1)
+		if err != nil {
+			return err
+		}
+		b.validatorGrBf.balance.gold = bal.gold
+		b.validatorGrBf.balance.usd = bal.usd
+		b.validatorGrBf.balance.lockedGold = bal.lockedGold
+		b.validatorGrBf.balance.nonVoting = bal.nonVoting
+		b.validatorGrBf.balance.total = bal.total
+		return nil
+	}
+
 	target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_RELEASE_GOLD_BENEFICIARY_ADDRESS")
 	target1, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_RELEASE_GOLD_BENEFICIARY_ADDRESS")
 	bal, err := parseBalances(target, target1)
 	if err != nil {
 		return err
 	}
-	v.balance.gold = bal.gold
-	v.balance.usd = bal.usd
-	v.balance.lockedGold = bal.lockedGold
-	v.balance.nonVoting = bal.nonVoting
-	v.balance.total = bal.total
+	b.validatorGrBf.balance.gold = bal.gold
+	b.validatorGrBf.balance.usd = bal.usd
+	b.validatorGrBf.balance.lockedGold = bal.lockedGold
+	b.validatorGrBf.balance.nonVoting = bal.nonVoting
+	b.validatorGrBf.balance.total = bal.total
 	return nil
 }
 
@@ -72,21 +89,6 @@ func (v *validatorGr) getBalance() error {
 func (v *validatorGrRG) getBalance() error {
 	target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_RG_ADDRESS")
 	target1, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_GROUP_RG_ADDRESS")
-	bal, err := parseBalances(target, target1)
-	if err != nil {
-		return err
-	}
-	v.balance.gold = bal.gold
-	v.balance.usd = bal.usd
-	v.balance.lockedGold = bal.lockedGold
-	v.balance.nonVoting = bal.nonVoting
-	v.balance.total = bal.total
-	return nil
-}
-
-func (v *validatorGrBf) getBalance() error {
-	target, _ := botExecCmdOut("celocli account:balance $CELO_VALIDATOR_GROUP_RELEASE_GOLD_BENEFICIARY_ADDRESS")
-	target1, _ := botExecCmdOut("celocli lockedgold:show $CELO_VALIDATOR_GROUP_RELEASE_GOLD_BENEFICIARY_ADDRESS")
 	bal, err := parseBalances(target, target1)
 	if err != nil {
 		return err
